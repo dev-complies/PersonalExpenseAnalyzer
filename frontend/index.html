@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Personal Expense Analyzer & Smart Splitter</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body class="theme-light">
+  <div id="app" class="app-layout">
+    <!-- Top Navigation Header -->
+    <header class="app-header">
+      <div class="header-left">
+        <div class="brand">
+          <div class="brand-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="4" width="20" height="16" rx="3"></rect>
+              <line x1="2" y1="10" x2="22" y2="10"></line>
+              <line x1="6" y1="15" x2="10" y2="15"></line>
+            </svg>
+          </div>
+          <div class="brand-text">
+            <span class="brand-title">ExpenseAnalyzer</span>
+            <span class="brand-subtitle">& Smart Splitter</span>
+          </div>
+        </div>
+      </div>
+
+      <nav class="header-nav">
+        <button class="nav-tab active" data-tab="dashboard">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"></rect><rect x="14" y="3" width="7" height="5"></rect><rect x="14" y="12" width="7" height="9"></rect><rect x="3" y="16" width="7" height="5"></rect></svg>
+          <span>Dashboard</span>
+        </button>
+        <button class="nav-tab" data-tab="expenses">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+          <span>Expenses</span>
+        </button>
+        <button class="nav-tab" data-tab="analytics">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+          <span>Analytics</span>
+        </button>
+        <button class="nav-tab" data-tab="budgets">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path><path d="M22 12A10 10 0 0 0 12 2v10z"></path></svg>
+          <span>Budgets</span>
+        </button>
+        <button class="nav-tab" data-tab="groups">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+          <span>Smart Splitter</span>
+        </button>
+      </nav>
+
+      <div class="header-right">
+        <div class="api-status" id="apiStatusBadge" title="Server status">
+          <span class="status-indicator"></span>
+          <span class="status-text">Connected</span>
+        </div>
+        <button id="themeToggleBtn" class="icon-button" title="Toggle Dark/Light Mode">
+          <svg id="themeIconSun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+          <svg id="themeIconMoon" class="hidden" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+        </button>
+        <button id="openAddExpenseBtn" class="btn btn-primary btn-sm">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          <span>Add Expense</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="app-main">
+      <!-- 1. DASHBOARD TAB -->
+      <section id="tab-dashboard" class="tab-pane active">
+        <!-- Top Stats Row -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon bg-indigo">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+            </div>
+            <div class="stat-info">
+              <span class="stat-label">Total Spending</span>
+              <h2 class="stat-value" id="dashTotalSpending">₹0.00</h2>
+              <span class="stat-hint" id="dashTotalCount">0 total transactions</span>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon bg-emerald">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            </div>
+            <div class="stat-info">
+              <span class="stat-label">Average Expense</span>
+              <h2 class="stat-value" id="dashAvgExpense">₹0.00</h2>
+              <span class="stat-hint">Per recorded expense</span>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon bg-amber">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+            </div>
+            <div class="stat-info">
+              <span class="stat-label">Highest Expense</span>
+              <h2 class="stat-value" id="dashHighestExpense">₹0.00</h2>
+              <span class="stat-hint" id="dashHighestTitle">—</span>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon bg-purple">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path><path d="M22 12A10 10 0 0 0 12 2v10z"></path></svg>
+            </div>
+            <div class="stat-info">
+              <span class="stat-label">Active Budgets</span>
+              <h2 class="stat-value" id="dashBudgetCount">0</h2>
+              <span class="stat-hint" id="dashBudgetStatus">Tracking this month</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="dashboard-charts-grid">
+          <div class="card chart-card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">Category Breakdown</h3>
+                <p class="card-subtitle">Spending distribution across categories</p>
+              </div>
+            </div>
+            <div class="chart-container donut-chart-container">
+              <canvas id="categoryDonutChart"></canvas>
+              <div id="categoryChartEmpty" class="chart-empty hidden">No expense data yet</div>
+            </div>
+          </div>
+
+          <div class="card chart-card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">Monthly Spending Trend</h3>
+                <p class="card-subtitle">Historical expense volume</p>
+              </div>
+            </div>
+            <div class="chart-container">
+              <canvas id="monthlyTrendChart"></canvas>
+              <div id="monthlyChartEmpty" class="chart-empty hidden">No expense data yet</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Transactions Preview -->
+        <div class="card recent-expenses-card">
+          <div class="card-header flex-between">
+            <div>
+              <h3 class="card-title">Recent Transactions</h3>
+              <p class="card-subtitle">Your latest logged personal expenses</p>
+            </div>
+            <button class="btn btn-outline btn-sm view-all-expenses-btn">View All</button>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Title</th>
+                  <th>Category</th>
+                  <th>Date</th>
+                  <th>Amount</th>
+                  <th>Notes</th>
+                  <th class="text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="dashRecentExpensesBody">
+                <tr><td colspan="6" class="text-center py-4">Loading expenses...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. EXPENSES TAB -->
+      <section id="tab-expenses" class="tab-pane">
+        <div class="card mb-4">
+          <div class="filter-bar">
+            <div class="search-box">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+              <input type="text" id="expenseSearchInput" placeholder="Search by title or note...">
+            </div>
+
+            <div class="filter-controls">
+              <select id="expenseCategoryFilter" class="form-select">
+                <option value="ALL">All Categories</option>
+              </select>
+
+              <select id="expenseSortSelect" class="form-select">
+                <option value="date-desc">Newest First</option>
+                <option value="date-asc">Oldest First</option>
+                <option value="amount-desc">Amount: High to Low</option>
+                <option value="amount-asc">Amount: Low to High</option>
+                <option value="title-asc">Title: A to Z</option>
+              </select>
+
+              <button id="exportCsvBtn" class="btn btn-secondary btn-sm" title="Export to CSV">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                <span>Export CSV</span>
+              </button>
+
+              <button class="btn btn-primary btn-sm trigger-add-expense">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                <span>New Expense</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Title</th>
+                  <th>Category</th>
+                  <th>Date</th>
+                  <th>Amount (₹)</th>
+                  <th>Note</th>
+                  <th class="text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="expensesTableBody">
+                <tr><td colspan="7" class="text-center py-4">Loading expenses...</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="table-footer flex-between">
+            <span class="text-muted" id="expenseSummaryCount">Showing 0 expenses</span>
+            <span class="font-semibold" id="expenseSummaryTotal">Total: ₹0.00</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. ANALYTICS TAB -->
+      <section id="tab-analytics" class="tab-pane">
+        <div class="grid-2col mb-4">
+          <!-- Peak Spending Window -->
+          <div class="card highlight-card">
+            <div class="card-header">
+              <div>
+                <span class="badge badge-indigo">Sliding Window Algorithm</span>
+                <h3 class="card-title mt-2">Peak 7-Day Spending Window</h3>
+              </div>
+            </div>
+            <div class="highlight-body">
+              <div class="highlight-amount" id="windowTotalPaise">₹0.00</div>
+              <p class="highlight-meta" id="windowDates">Window: No data</p>
+              <p class="text-muted text-sm mt-2">Evaluated via sliding window algorithm across your expense history to detect highest volume consecutive expenditure periods.</p>
+            </div>
+          </div>
+
+          <!-- Quick Min / Max Spotlight -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Expense Extremes</h3>
+            </div>
+            <div class="extremes-grid">
+              <div class="extreme-item">
+                <span class="extreme-label text-emerald">Lowest Expense</span>
+                <div class="extreme-val" id="analyticsLowestVal">₹0.00</div>
+                <div class="extreme-sub" id="analyticsLowestTitle">—</div>
+              </div>
+              <div class="extreme-divider"></div>
+              <div class="extreme-item">
+                <span class="extreme-label text-rose">Highest Expense</span>
+                <div class="extreme-val" id="analyticsHighestVal">₹0.00</div>
+                <div class="extreme-sub" id="analyticsHighestTitle">—</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Detailed Category Analytics Table -->
+        <div class="card mb-4">
+          <div class="card-header">
+            <h3 class="card-title">Category Spending Analytics</h3>
+            <p class="card-subtitle">Spending breakdown with proportions and averages</p>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Category</th>
+                  <th>Total Spent</th>
+                  <th>Share of Total</th>
+                  <th style="min-width: 180px;">Distribution</th>
+                </tr>
+              </thead>
+              <tbody id="categoryAnalyticsTableBody">
+                <tr><td colspan="4" class="text-center py-4">No category analytics available</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Daily Spending Chart -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Daily Expenditure Timeline</h3>
+            <p class="card-subtitle">Day-by-day cash flow overview</p>
+          </div>
+          <div class="chart-container timeline-chart-container">
+            <canvas id="dailyTimelineChart"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. BUDGETS TAB -->
+      <section id="tab-budgets" class="tab-pane">
+        <div class="flex-between mb-4">
+          <div>
+            <h2 class="section-title">Budget Manager</h2>
+            <p class="text-muted">Set monthly limits to keep personal spending under control</p>
+          </div>
+          <button id="openSetBudgetBtn" class="btn btn-primary btn-sm">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            <span>Set New Budget</span>
+          </button>
+        </div>
+
+        <div class="budgets-grid" id="budgetsGridContainer">
+          <div class="card empty-card">
+            <p>No active budgets found. Set a budget to track category limits!</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. SMART SPLITTER (GROUPS) TAB -->
+      <section id="tab-groups" class="tab-pane">
+        <div class="flex-between mb-4">
+          <div>
+            <h2 class="section-title">Smart Expense Splitter</h2>
+            <p class="text-muted">Split group expenses, track balances, and compute minimal debt settlements</p>
+          </div>
+          <button id="openCreateGroupBtn" class="btn btn-primary btn-sm">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            <span>Create Group</span>
+          </button>
+        </div>
+
+        <div class="groups-layout">
+          <!-- Sidebar: Groups List -->
+          <div class="groups-sidebar card">
+            <div class="card-header">
+              <h3 class="card-title">Your Groups</h3>
+            </div>
+            <div class="groups-list" id="groupsListContainer">
+              <div class="p-3 text-muted text-center">Loading groups...</div>
+            </div>
+          </div>
+
+          <!-- Main: Active Group View -->
+          <div class="group-details-pane" id="groupDetailsPane">
+            <div class="card mb-4 group-overview-card" id="groupOverviewCard">
+              <div class="flex-between">
+                <div>
+                  <span class="badge badge-indigo" id="groupCodeBadge">CODE: —</span>
+                  <h2 class="mt-2 text-2xl font-bold" id="groupNameTitle">Select a Group</h2>
+                  <p class="text-muted mt-1" id="groupMembersList">Members: —</p>
+                </div>
+                <button id="openAddGroupExpenseBtn" class="btn btn-primary btn-sm hidden">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                  <span>Add Group Expense</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Balances and Minimal Settlements -->
+            <div class="grid-2col mb-4">
+              <!-- Balances Card -->
+              <div class="card">
+                <div class="card-header">
+                  <h3 class="card-title">Member Balances</h3>
+                  <p class="card-subtitle">Positive = To Receive | Negative = To Pay</p>
+                </div>
+                <div class="balances-list" id="groupBalancesList">
+                  <p class="text-muted p-3">Select a group to view balances</p>
+                </div>
+              </div>
+
+              <!-- Settlement Plan Card -->
+              <div class="card">
+                <div class="card-header">
+                  <span class="badge badge-emerald">Settlement Engine</span>
+                  <h3 class="card-title mt-2">Optimal Settlement Plan</h3>
+                  <p class="card-subtitle">Minimized debt resolution transfers</p>
+                </div>
+                <div class="settlements-list" id="groupSettlementsList">
+                  <p class="text-muted p-3">Select a group to see settlements</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Group Expenses History -->
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Group Expense History</h3>
+              </div>
+              <div class="table-responsive">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Description</th>
+                      <th>Category</th>
+                      <th>Paid By</th>
+                      <th>Total Amount</th>
+                      <th>Date</th>
+                      <th>Split Breakdown</th>
+                    </tr>
+                  </thead>
+                  <tbody id="groupExpensesTableBody">
+                    <tr><td colspan="6" class="text-center py-4">No group selected</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Modal: Add / Edit Expense -->
+    <div id="expenseModal" class="modal-backdrop hidden">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 class="modal-title" id="expenseModalTitle">Add Expense</h3>
+          <button class="modal-close-btn" data-close-modal>&times;</button>
+        </div>
+        <form id="expenseForm">
+          <input type="hidden" id="formExpenseId" value="">
+          <div class="form-group">
+            <label for="formTitle" class="form-label">Title *</label>
+            <input type="text" id="formTitle" class="form-input" placeholder="e.g. Dinner, Grocery, Metro Pass" required>
+          </div>
+
+          <div class="grid-2col">
+            <div class="form-group">
+              <label for="formCategory" class="form-label">Category *</label>
+              <input type="text" id="formCategory" class="form-input" list="categorySuggestions" placeholder="Food, Travel, Bills..." required>
+              <datalist id="categorySuggestions">
+                <option value="Food">
+                <option value="Travel">
+                <option value="Shopping">
+                <option value="Bills">
+                <option value="Entertainment">
+                <option value="Health">
+                <option value="Education">
+                <option value="Other">
+              </datalist>
+            </div>
+
+            <div class="form-group">
+              <label for="formAmount" class="form-label">Amount in Rupees (₹) *</label>
+              <input type="number" id="formAmount" class="form-input" step="0.01" min="0.01" placeholder="0.00" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="formDate" class="form-label">Date (YYYY-MM-DD) *</label>
+            <input type="date" id="formDate" class="form-input" required>
+          </div>
+
+          <div class="form-group">
+            <label for="formNote" class="form-label">Note (Optional)</label>
+            <textarea id="formNote" class="form-textarea" rows="2" placeholder="Additional details or comments..."></textarea>
+          </div>
+
+          <div class="modal-actions">
+            <button type="button" class="btn btn-secondary" data-close-modal>Cancel</button>
+            <button type="submit" class="btn btn-primary" id="expenseSubmitBtn">Save Expense</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal: Set Budget -->
+    <div id="budgetModal" class="modal-backdrop hidden">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 class="modal-title">Set Monthly Budget</h3>
+          <button class="modal-close-btn" data-close-modal>&times;</button>
+        </div>
+        <form id="budgetForm">
+          <div class="form-group">
+            <label for="budgetFormCategory" class="form-label">Category *</label>
+            <input type="text" id="budgetFormCategory" class="form-input" placeholder="e.g. ALL (overall) or Food, Travel..." required>
+            <span class="text-muted text-xs">Type "ALL" to set an overall monthly ceiling</span>
+          </div>
+
+          <div class="form-group">
+            <label for="budgetFormLimit" class="form-label">Budget Limit (₹) *</label>
+            <input type="number" id="budgetFormLimit" class="form-input" step="1" min="1" placeholder="e.g. 5000" required>
+          </div>
+
+          <div class="modal-actions">
+            <button type="button" class="btn btn-secondary" data-close-modal>Cancel</button>
+            <button type="submit" class="btn btn-primary">Save Budget</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal: Create Group -->
+    <div id="groupModal" class="modal-backdrop hidden">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 class="modal-title">Create New Group</h3>
+          <button class="modal-close-btn" data-close-modal>&times;</button>
+        </div>
+        <form id="groupForm">
+          <div class="form-group">
+            <label for="groupFormName" class="form-label">Group Name *</label>
+            <input type="text" id="groupFormName" class="form-input" placeholder="e.g. Goa Trip, Flat 402, Hackathon Team" required>
+          </div>
+
+          <div class="form-group">
+            <label for="groupFormMembers" class="form-label">Add Member Names (comma-separated)</label>
+            <input type="text" id="groupFormMembers" class="form-input" placeholder="e.g. Alice, Bob, Charlie">
+            <span class="text-muted text-xs">You (Arsh) will be included as the group creator automatically.</span>
+          </div>
+
+          <div class="modal-actions">
+            <button type="button" class="btn btn-secondary" data-close-modal>Cancel</button>
+            <button type="submit" class="btn btn-primary">Create Group</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal: Add Group Expense -->
+    <div id="groupExpenseModal" class="modal-backdrop hidden">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 class="modal-title">Add Group Expense</h3>
+          <button class="modal-close-btn" data-close-modal>&times;</button>
+        </div>
+        <form id="groupExpenseForm">
+          <input type="hidden" id="groupExpenseFormGroupId" value="">
+          <div class="form-group">
+            <label for="geFormTitle" class="form-label">Description *</label>
+            <input type="text" id="geFormTitle" class="form-input" placeholder="e.g. Resort Booking, Dinner at Cafe" required>
+          </div>
+
+          <div class="grid-2col">
+            <div class="form-group">
+              <label for="geFormCategory" class="form-label">Category</label>
+              <input type="text" id="geFormCategory" class="form-input" placeholder="Travel, Food, Stay...">
+            </div>
+
+            <div class="form-group">
+              <label for="geFormAmount" class="form-label">Total Amount (₹) *</label>
+              <input type="number" id="geFormAmount" class="form-input" step="0.01" min="0.01" placeholder="0.00" required>
+            </div>
+          </div>
+
+          <div class="grid-2col">
+            <div class="form-group">
+              <label for="geFormPaidBy" class="form-label">Paid By *</label>
+              <select id="geFormPaidBy" class="form-select" required></select>
+            </div>
+
+            <div class="form-group">
+              <label for="geFormDate" class="form-label">Date *</label>
+              <input type="date" id="geFormDate" class="form-input" required>
+            </div>
+          </div>
+
+          <div class="split-info-banner mt-2">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+            <span>Amount will be split equally among all members of the group. Exact shares are calculated down to the paise.</span>
+          </div>
+
+          <div class="modal-actions">
+            <button type="button" class="btn btn-secondary" data-close-modal>Cancel</button>
+            <button type="submit" class="btn btn-primary">Add Expense</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toastContainer" class="toast-container"></div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
