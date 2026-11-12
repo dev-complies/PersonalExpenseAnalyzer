@@ -66,38 +66,75 @@ Install the JSON library in the UCRT64 terminal:
 pacman -S mingw-w64-ucrt-x86_64-nlohmann-json
 ```
 
-## Build and Run the Backend
+## Build and Run
 
-Open the MSYS2 UCRT64 terminal and navigate to the project root directory.
-
-Compile the backend:
+### Quick Start with Make (macOS / Linux / Windows)
 
 ```bash
-g++ -std=c++17 -O2 -Wall -Wextra -I. \
-api/server_main.cpp \
-api/ExpenseApi.cpp \
-application/ApplicationState.cpp \
-application/ExpenseService.cpp \
-core/expense_manager.cpp \
-storage/ExpenseStorage.cpp \
-storage/storage_manager.cpp \
--o expense_server.exe \
--lws2_32
+# Build the server
+make build
+
+# Start the server
+make run
+
+# Run test suite
+make test
 ```
 
-Start the server:
+### Manual Compilation
+
+**On macOS / Linux:**
+```bash
+clang++ -std=c++17 -O2 -Wall -Wextra -I. -Iinclude \
+  api/server_main.cpp \
+  api/ExpenseApi.cpp \
+  application/ApplicationState.cpp \
+  application/ExpenseService.cpp \
+  core/expense_manager.cpp \
+  core/budget_manager.cpp \
+  core/GroupManager.cpp \
+  core/GroupExpenseManager.cpp \
+  core/BalanceEngine.cpp \
+  core/SettlementEngine.cpp \
+  core/SplitEngine.cpp \
+  core/ExpenseAlgorithms.cpp \
+  storage/ExpenseStorage.cpp \
+  storage/storage_manager.cpp \
+  -o expense_server \
+  -pthread
+```
+
+**On Windows (MSYS2 UCRT64 / MinGW):**
+```bash
+g++ -std=c++17 -O2 -Wall -Wextra -I. -Iinclude \
+  api/server_main.cpp \
+  api/ExpenseApi.cpp \
+  application/ApplicationState.cpp \
+  application/ExpenseService.cpp \
+  core/expense_manager.cpp \
+  core/budget_manager.cpp \
+  core/GroupManager.cpp \
+  core/GroupExpenseManager.cpp \
+  core/BalanceEngine.cpp \
+  core/SettlementEngine.cpp \
+  core/SplitEngine.cpp \
+  core/ExpenseAlgorithms.cpp \
+  storage/ExpenseStorage.cpp \
+  storage/storage_manager.cpp \
+  -o expense_server.exe \
+  -lws2_32
+```
+
+### Start the Server
 
 ```bash
-./expense_server.exe
+./expense_server
 ```
 
-The backend runs at:
+Once running:
+- **Frontend Website:** Open [`http://localhost:8080`](http://localhost:8080) directly in your browser.
+- **REST API:** Available at [`http://localhost:8080/api`](http://localhost:8080/api).
 
-```text
-http://localhost:8080
-```
-
-To stop the server, press `Ctrl + C`.
 
 ## API Endpoints
 

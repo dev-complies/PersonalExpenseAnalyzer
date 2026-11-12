@@ -76,7 +76,40 @@ The frontend should divide `amountPaise` by 100 to display the amount in rupees.
 
 ## 5. API Endpoints
 
-### 5.1 Get All Expenses
+### 5.1 Personal Expenses Endpoints
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/api/expenses` | Fetch all expenses |
+| GET | `/api/expenses/:id` | Fetch an expense by ID |
+| POST | `/api/expenses` | Create a new expense |
+| PUT | `/api/expenses/:id` | Update an existing expense |
+| DELETE | `/api/expenses/:id` | Delete an expense |
+
+### 5.2 Analytics Endpoint
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/api/analytics` | Overall spending stats, averages, extremes, category & monthly breakdown, and peak 7-day spending window |
+
+### 5.3 Budgets Endpoints
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/api/budgets` | Fetch active budgets with live spending status, percentage used, and alert status |
+| POST | `/api/budgets` | Create or update a budget (`category`, `limitPaise`, `period`) |
+| DELETE | `/api/budgets/:category` | Remove a budget |
+
+### 5.4 Groups & Smart Splitter Endpoints
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/api/groups` | Fetch all groups with member counts |
+| GET | `/api/groups/:id` | Fetch group details, members, expenses, net balances, and minimal settlement plan |
+| POST | `/api/groups` | Create a new group with member names |
+| POST | `/api/groups/:id/expenses` | Add a group expense with automatic equal split calculation |
+| GET | `/api/users` | List all registered users |
+
 
 **Method:** GET
 
