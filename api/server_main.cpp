@@ -38,6 +38,14 @@ int main()
         }
     );
 
+    // Redirect /api or /api/ to frontend dashboard
+    server.Get("/api", [](const httplib::Request&, httplib::Response& res) {
+        res.set_redirect("/");
+    });
+    server.Get("/api/", [](const httplib::Request&, httplib::Response& res) {
+        res.set_redirect("/");
+    });
+
     // -------------------------------------------------------------
     // Personal Expenses Endpoints
     // -------------------------------------------------------------
