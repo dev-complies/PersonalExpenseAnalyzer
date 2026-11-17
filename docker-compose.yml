@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  expense-app:
+    build: .
+    container_name: expense_analyzer
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      # Persists your data files (expenses, groups, budgets) on the host machine
+      - ./storage:/app/storage
