@@ -29,9 +29,25 @@ void ApplicationState::load()
 {
     // Personal expenses
     loadExpensesFromFile(expenses, EXPENSE_FILE);
+    if (expenses.empty())
+    {
+        loadExpensesFromFile(expenses, "storage/expenses_test.csv");
+        if (!expenses.empty())
+        {
+            saveExpensesToFile(expenses, EXPENSE_FILE);
+        }
+    }
 
     // Users
     loadUsers(users, "storage/users.txt");
+    if (users.empty())
+    {
+        loadUsers(users, "storage/users_test.txt");
+        if (!users.empty())
+        {
+            saveUsers(users, "storage/users.txt");
+        }
+    }
 
     // Ensure current user exists
     bool userExists = false;
@@ -49,19 +65,38 @@ void ApplicationState::load()
     {
         User currentUser;
         currentUser.id = currentUserId;
-        currentUser.name = "Arsh";
+        currentUser.name = "Arsh (You)";
 
         users.push_back(currentUser);
     }
 
     // Groups
     loadGroups(groups, "storage/groups.txt");
+    if (groups.empty())
+    {
+        loadGroups(groups, "storage/groups_test.txt");
+        if (!groups.empty())
+        {
+            saveGroups(groups, "storage/groups.txt");
+        }
+    }
 
     // Group expenses
     loadGroupExpenses(
         groupExpenses,
         "storage/group_expenses.txt"
     );
+    if (groupExpenses.empty())
+    {
+        loadGroupExpenses(
+            groupExpenses,
+            "storage/group_expenses_test.txt"
+        );
+        if (!groupExpenses.empty())
+        {
+            saveGroupExpenses(groupExpenses, "storage/group_expenses.txt");
+        }
+    }
 
     // Settlements
     loadSettlements(
@@ -71,6 +106,17 @@ void ApplicationState::load()
 
     // Budgets
     loadBudgets(budgets, "storage/budgets.txt");
+    if (budgets.empty())
+    {
+        budgets = {
+            {currentUserId, "Food", 500000, BudgetPeriod::MONTHLY},
+            {currentUserId, "Travel", 280000, BudgetPeriod::MONTHLY},
+            {currentUserId, "Entertainment", 80000, BudgetPeriod::MONTHLY},
+            {currentUserId, "Groceries", 400000, BudgetPeriod::MONTHLY},
+            {currentUserId, "ALL", 2500000, BudgetPeriod::MONTHLY}
+        };
+        saveBudgets(budgets, "storage/budgets.txt");
+    }
 }
 
 bool ApplicationState::save() const
