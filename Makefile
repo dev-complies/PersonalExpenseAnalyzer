@@ -27,7 +27,7 @@ else
     RM = rm -f
 endif
 
-.PHONY: all build run clean test
+.PHONY: all build run clean test demo
 
 all: $(TARGET)
 
@@ -44,5 +44,10 @@ test:
 	./api_test
 	$(RM) api_test
 
+demo:
+	$(CXX) $(CXXFLAGS) features/demo_all_10_features.cpp -o demo_10_features $(LDFLAGS)
+	./demo_10_features
+	$(RM) demo_10_features
+
 clean:
-	$(RM) $(TARGET) api_test *.o
+	$(RM) $(TARGET) api_test demo_10_features *.o
