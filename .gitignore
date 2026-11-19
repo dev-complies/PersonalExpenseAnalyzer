@@ -36,15 +36,6 @@ compile_log.txt
 # Code information
 z_info
 
-# Local application data - may contain personal information
-storage/budgets.txt
-storage/expenses.csv
-storage/expenses.txt
-storage/groups.txt
-storage/group_expenses.txt
-storage/settlements.txt
-storage/users.txt
-
 # Compiled binaries and libraries
 *.exe
 *.dll

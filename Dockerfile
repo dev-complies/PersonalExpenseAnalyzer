@@ -35,8 +35,8 @@ COPY --from=builder /build/frontend ./frontend
 # Copy default initial storage structure
 COPY --from=builder /build/storage ./storage
 
-# Persistent volume for application data files
-VOLUME ["/app/storage"]
+# Ensure full read/write permissions for storage files
+RUN chmod -R 777 ./storage
 
 # HTTP Server Port
 EXPOSE 8080

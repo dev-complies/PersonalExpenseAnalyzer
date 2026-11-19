@@ -2,8 +2,8 @@
  * Personal Expense Analyzer & Smart Splitter Frontend Application
  */
 
-// Configuration: API Base URL
-const API_BASE_URL = window.location.origin.includes('localhost') || window.location.origin.includes('127.0.0.1')
+// Configuration: API Base URL (auto-detects current domain/protocol so it works on Render, localhost, or custom domains)
+const API_BASE_URL = (window.location.protocol === 'http:' || window.location.protocol === 'https:')
   ? `${window.location.origin}/api`
   : 'http://localhost:8080/api';
 
