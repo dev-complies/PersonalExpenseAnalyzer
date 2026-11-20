@@ -89,11 +89,30 @@ function showToast(message, type = 'success') {
 }
 
 // ============================================================
+// SERVER STATUS MANAGEMENT
+// ============================================================
+
+function setServerStatus(online) {
+  const statusBadge = document.getElementById('apiStatusBadge');
+  if (!statusBadge) return;
+  if (online) {
+    statusBadge.classList.remove('offline');
+    const textEl = statusBadge.querySelector('.status-text');
+    if (textEl) textEl.textContent = 'Connected';
+    statusBadge.setAttribute('title', 'Server is online and responding (Click to refresh)');
+  } else {
+    statusBadge.classList.add('offline');
+    const textEl = statusBadge.querySelector('.status-text');
+    if (textEl) textEl.textContent = 'Offline';
+    statusBadge.setAttribute('title', 'Server disconnected (Click to reconnect)');
+  }
+}
+
+// ============================================================
 // API CLIENT
 // ============================================================
 
 async function apiRequest(endpoint, options = {}) {
-  const statusBadge = document.getElementById('apiStatusBadge');
   try {
     const url = `${API_BASE_URL}${endpoint}`;
     const res = await fetch(url, {
@@ -104,22 +123,24 @@ async function apiRequest(endpoint, options = {}) {
       }
     });
 
-    if (statusBadge) {
-      statusBadge.classList.remove('offline');
-      statusBadge.querySelector('.status-text').textContent = 'Connected';
+    if (!res.ok) {
+      throw new Error(`HTTP error ${res.status}`);
     }
 
     const json = await res.json();
     if (!json.success) {
       throw new Error(json.message || 'API request returned an error');
     }
+
+    // Any successful response confirms the server is online
+    setServerStatus(true);
     return json.data;
   } catch (err) {
-    if (statusBadge) {
-      statusBadge.classList.add('offline');
-      statusBadge.querySelector('.status-text').textContent = 'Offline';
+    console.warn(`API call to ${endpoint} failed:`, err.message);
+    // Only mark offline if we have no prior data or if it's a critical network refusal
+    if (!state.expenses || state.expenses.length === 0) {
+      setServerStatus(false);
     }
-    console.error(`API Error on ${endpoint}:`, err);
     throw err;
   }
 }
@@ -131,18 +152,23 @@ async function apiRequest(endpoint, options = {}) {
 async function syncAllData() {
   try {
     const [expenses, analytics, budgets, groups, users] = await Promise.all([
-      apiRequest('/expenses').catch(() => []),
+      apiRequest('/expenses').catch(() => null),
       apiRequest('/analytics').catch(() => null),
-      apiRequest('/budgets').catch(() => []),
-      apiRequest('/groups').catch(() => []),
-      apiRequest('/users').catch(() => [])
+      apiRequest('/budgets').catch(() => null),
+      apiRequest('/groups').catch(() => null),
+      apiRequest('/users').catch(() => null)
     ]);
 
-    state.expenses = expenses || [];
-    state.analytics = analytics;
-    state.budgets = budgets || [];
-    state.groups = groups || [];
-    state.users = users || [];
+    if (expenses !== null) state.expenses = expenses;
+    if (analytics !== null) state.analytics = analytics;
+    if (budgets !== null) state.budgets = budgets;
+    if (groups !== null) state.groups = groups;
+    if (users !== null) state.users = users;
+
+    // If server responded with data, ensure badge is explicitly marked Connected
+    if (expenses !== null || groups !== null || budgets !== null) {
+      setServerStatus(true);
+    }
 
     updateCategoryFilterDropdown();
     applyExpenseFilters();
@@ -157,7 +183,8 @@ async function syncAllData() {
       selectGroup(state.activeGroupId);
     }
   } catch (err) {
-    showToast('Failed to load data from server. Please check if backend is running.', 'error');
+    setServerStatus(false);
+    showToast('Connecting to server...', 'info');
   }
 }
 
@@ -1088,6 +1115,26 @@ document.addEventListener('DOMContentLoaded', () => {
   // Export CSV
   const exportBtn = document.getElementById('exportCsvBtn');
   if (exportBtn) exportBtn.addEventListener('click', exportExpensesToCsv);
+
+  // Click status badge to manually check connection / reconnect
+  const statusBadge = document.getElementById('apiStatusBadge');
+  if (statusBadge) {
+    statusBadge.style.cursor = 'pointer';
+    statusBadge.addEventListener('click', async () => {
+      showToast('Checking connection...', 'info');
+      await syncAllData();
+      if (!statusBadge.classList.contains('offline')) {
+        showToast('Server connected! 🟢', 'success');
+      }
+    });
+  }
+
+  // Periodic health check every 45 seconds (keeps Render free tier warm)
+  setInterval(() => {
+    apiRequest('/expenses')
+      .then(() => setServerStatus(true))
+      .catch(() => {});
+  }, 45000);
 
   // Initial Sync
   syncAllData();
